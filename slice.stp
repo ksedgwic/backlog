@@ -1,0 +1,19 @@
+#! /usr/bin/env stap
+
+global started
+
+probe scheduler.ctxswitch
+{
+    now = gettimeofday_us();
+
+    if (prev_pid == target()) {
+        if (started[prev_tid] != 0) {
+            printf("%16d %5d %5d uSec\n", now, prev_tid, now - started[prev_tid]);
+            started[prev_tid] = 0;
+        }
+    }
+
+    if (next_pid == target()) {
+        started[next_tid] = now;
+    }
+}
