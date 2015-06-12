@@ -43,8 +43,8 @@ backlog_t g_backlog;
 static void *
 producer_thread(void * arg)
 {
-    long id = (long) arg;
-    printf("producer %2ld starting\n", id);
+    // long id = (long) arg;
+    // fprintf(stderr, "producer %2ld starting\n", id);
 
     for (int ii = 0; ii < NUMBLOCKS; ++ii)
     {
@@ -53,8 +53,8 @@ producer_thread(void * arg)
 #endif
 
         if (ii % 10 == 0)
-            printf("producer %2ld, block %3d\n", id, ii);
-
+            fprintf(stderr, "P");
+        
         produce_block(ii);
 
 #if defined(USE_BACKLOG)
@@ -62,21 +62,21 @@ producer_thread(void * arg)
 #endif
     }
     
-    printf("producer %2ld finished\n", id);
+    // fprintf(stderr, "producer %2ld finished\n", id);
     return NULL;
 }
 
 static void *
 consumer_thread(void * arg)
 {
-    long id = (long) arg;
-    printf("consumer %2ld starting\n", id);
+    // long id = (long) arg;
+    // fprintf(stderr, "consumer %2ld starting\n", id);
 
     for (int ii = 0; ii < NUMBLOCKS; ++ii)
     {
         if (ii % 10 == 0)
-            printf("consumer %2ld, block %3d\n", id, ii);
-
+            fprintf(stderr, "C");
+        
         consume_block(ii);
 
 #if defined(USE_BACKLOG)
@@ -84,7 +84,7 @@ consumer_thread(void * arg)
 #endif
     }
     
-    printf("consumer %2ld finished\n", id);
+    // fprintf(stderr, "consumer %2ld finished\n", id);
     return NULL;
 }
 
@@ -118,17 +118,21 @@ main(int argc, char ** argv)
     for (long ii = 0; ii < NPRODUCERS; ++ii)
         pthread_join(pt[ii], NULL);
 
-    printf("---- ALL PRODUCERS FINISHED ----\n");
+    fprintf(stderr, "####");
 
     for (long ii = 0; ii < NCONSUMERS; ++ii)
         pthread_join(ct[ii], NULL);
 
     uint64_t t1 = now();
 
+    fprintf(stderr, "\n");
+
 #if defined(USE_BACKLOG)
-    printf("  using backlog program took %f mSec\n", (double)(t1 - t0) / 1000.0);
+    fprintf(stderr,
+        "  using backlog program took %f mSec\n", (double)(t1 - t0) / 1000.0);
 #else
-    printf("without backlog program took %f mSec\n", (double)(t1 - t0) / 1000.0);
+    fprintf(stderr,
+        "without backlog program took %f mSec\n", (double)(t1 - t0) / 1000.0);
 #endif
 
     return 0;
