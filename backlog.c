@@ -1,5 +1,10 @@
 #include "backlog.h"
 
+#if defined(USE_SYSTEMTAP)
+#include <sys/sdt.h>
+#include "probes.h"
+#endif
+
 int
 backlog_init(backlog_t * blp, long limit)
 {
@@ -22,6 +27,10 @@ backlog_incr(backlog_t * blp, long delta)
 int
 backlog_decr(backlog_t * blp, long delta)
 {
+#if defined(USE_SYSTEMTAP)
+    BACKLOG_DECR_STARTING(blp->count, delta);
+#endif
+
     pthread_mutex_lock(&blp->mutex);
 
     // Decrease the count.
@@ -31,11 +40,18 @@ backlog_decr(backlog_t * blp, long delta)
     if (blp->count + delta > blp->limit &&
         blp->count <= blp->limit)
     {
+#if defined(USE_SYSTEMTAP)
+        BACKLOG_DECR_BROADCAST(blp->count, delta);
+#endif
         // Wake any waiters
         pthread_cond_broadcast(&blp->cond);
     }
 
     pthread_mutex_unlock(&blp->mutex);
+
+#if defined(USE_SYSTEMTAP)
+    BACKLOG_DECR_FINISHED(blp->count, delta);
+#endif
 
     return 0;	// FIXME - status?
 }
@@ -43,12 +59,27 @@ backlog_decr(backlog_t * blp, long delta)
 int
 backlog_wait(backlog_t * blp)
 {
+#if defined(USE_SYSTEMTAP)
+    BACKLOG_WAIT_STARTING(blp->count);
+#endif
+
     pthread_mutex_lock(&blp->mutex);
 
-    while (blp->count > blp->limit)
+    while (blp->count > blp->limit) {
+#if defined(USE_SYSTEMTAP)
+        BACKLOG_WAIT_SLEEPING(blp->count);
+#endif
         pthread_cond_wait(&blp->cond, &blp->mutex);
+#if defined(USE_SYSTEMTAP)
+        BACKLOG_WAIT_AWOKEN(blp->count);
+#endif
+    }
     
     pthread_mutex_unlock(&blp->mutex);
+
+#if defined(USE_SYSTEMTAP)
+    BACKLOG_WAIT_FINISHED(blp->count);
+#endif
 
     return 0;	// FIXME - status?
 }

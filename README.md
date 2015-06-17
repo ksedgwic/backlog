@@ -13,7 +13,7 @@ The backlog api throttles the producers so they are no more then 16
 blocks ahead of the consumers at any point; they finish together.
 
     # Build and run w/o backlog API.
-    make clean all
+    make USE_BACKLOG=0 clean all
     ./sample
 
     # Build and run with the backlog API.
@@ -30,6 +30,7 @@ Setup Systemtap
 
     sudo yum install systemtap systemtap-runtime systemtap-sdt-devel
     sudo yum install kernel-debuginfo
+    sudo stap-prep
 
     # Add user to stap groups:
     stapusr:x:156:citrusleaf
@@ -60,3 +61,11 @@ A sample excerpt from the slices.log is:
 1434071285718276 30231  6000 uSec
 1434071285718286 30235  6020 uSec                                                                 
 ```
+
+Inspecting Switching Behavior
+----------------------------------------------------------------
+
+    make clean all
+    stap switch.stp -o results.log -c ./sample
+    ./annotate < results.log > results.txt
+

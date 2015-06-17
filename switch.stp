@@ -1,0 +1,51 @@
+#!/usr/bin/env stap
+
+/*
+probe process("./sample").mark("decr__starting")
+{
+    printf("%d %d backlog_decr_starting count=%d delta=%d\n",
+           gettimeofday_us(), tid(), $arg1, $arg2);
+}
+*/
+
+probe process("./sample").mark("decr__broadcast")
+{
+    printf("%d %d backlog_decr_broadcast count=%d delta=%d\n",
+           gettimeofday_us(), tid(), $arg1, $arg2);
+}
+
+/*
+probe process("./sample").mark("decr__finished")
+{
+    printf("%d %d backlog_decr_finished count=%d delta=%d\n",
+           gettimeofday_us(), tid(), $arg1, $arg2);
+}
+*/
+
+/*
+probe process("./sample").mark("wait__starting")
+{
+    printf("%d %d backlog_wait_starting count=%d\n",
+           gettimeofday_us(), tid(), $arg1);
+}
+*/
+
+probe process("./sample").mark("wait__sleeping")
+{
+    printf("%d %d backlog_wait_sleeping count=%d\n",
+           gettimeofday_us(), tid(), $arg1);
+}
+
+probe process("./sample").mark("wait__awoken")
+{
+    printf("%d %d backlog_wait_awoken count=%d\n",
+           gettimeofday_us(), tid(), $arg1);
+}
+
+/*
+probe process("./sample").mark("wait__finished")
+{
+    printf("%d %d backlog_wait_finished count=%d\n",
+           gettimeofday_us(), tid(), $arg1);
+}
+*/
